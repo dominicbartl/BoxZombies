@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <title>Getting Started with Three.js</title>
+
+    <script type="text/javascript" src="Three.js"></script>
+    <script type="text/javascript">
+        var tex_stone = "stone.jpg";
+
+        var camera, scene, renderer,
+        geometry, material, projector, mouse3D;
+
+        var camOffset = new THREE.Vector3(0,-300,500);
+
+        var floor,box;
+        var zombies = [];
+
+        window.onload = init;
+
+
+        function init() {
+
+            scene = new THREE.Scene();
+
+            camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 10000 );
+            camera.position = camOffset;
+            //camera.position.y = 0;
+            camera.lookAt(new THREE.Vector3(0,0,0));
+            
+            scene.add( camera );
+
+            // add subtle ambient lighting
+            var ambientLight = new THREE.AmbientLight(0x555555);
+            scene.add(ambientLight);
+     
+            // add directional light source
+            var directionalLight = new THREE.DirectionalLight(0xffffff);
+            directionalLight.position.set(1, 1, 1).normalize();
+            scene.add(directionalLight);
+
+            
+            // material
+            /*var textureCanvas = THREE.ImageUtils.loadTexture(tex_stone, THREE.UVMapping, THREE.RepeatWrapping, THREE.RepeatWrapping);
+
+            var material = new THREE.MeshBasicMaterial({
+                map: textureCanvas
+            });
+            textureCanvas.needsUpdate = true;
+            textureCanvas.repeat.set( 1000, 1000 );*/
+
+            //GROUND
+            var imageCanvas = document.createElement( "canvas" ),
+                    context = imageCanvas.getContext( "2d" );
+
+            imageCanvas.width = imageCanvas.height = 128;
+
+            context.fillStyle = "#444";
+            context.fillRect( 0, 0, 128, 128 );
+
+            context.fillStyle = "#fff";
+            context.fillRect( 0, 0, 64, 64);
+            context.fillRect( 64, 64, 64, 64 );
+
+            var textureCanvas = new THREE.Texture( imageCanvas, THREE.UVMapping, THREE.RepeatWrapping, THREE.RepeatWrapping );
+            materialCanvas = new THREE.MeshBasicMaterial( { map: textureCanvas } );
+
+                textureCanvas.needsUpdate = true;
+                textureCanvas.repeat.set( 1000, 1000 );
+
+            floor = new THREE.Mesh( new THREE.PlaneGeometry( 100, 100), materialCanvas );
+            floor.scale.set(1000,1000,1000);
+            scene.add( floor );
+
+
+            //Player
+            box = new THREE.Mesh(
+                new THREE.CubeGeometry( 30, 30, 30),
+                new THREE.MeshLambertMaterial( { color: 0x444444 }) );
+            box.position.z = 30;
+            scene.add(box);
+
+            spawnZombie(5);
+
+
+            renderer = new THREE.WebGLRenderer({antialias: true});
+            renderer.setSize( window.innerWidth, window.innerHeight );
+
+            projector = new THREE.Projector();
+
+            document.body.appendChild( renderer.domElement );
+
+            window.addEventListener("keydown",onKeyDown);
+            window.addEventListener("keyup",onKeyUp);
+            window.addEventListener("mousemove",onMouseMove);
+            window.addEventListener("mouseup", onMouseUp);
+
+
+            animate();
+
+        }
+
+        var speed = 5;
+
+        function movePlayer(){
+            if(move){
+                box.rotation.z = angle*(Math.PI/180);
+                box.position.x +=Math.cos(box.rotation.z)*speed;
+                box.position.y +=Math.sin(box.rotation.z)*speed;
+                camera.position.x = box.position.x;
+                camera.position.y = box.position.y -300;
+            }
+        }
+
+
+        function spawnZombie(amount){
+            for(var i = 0; i <= amount; i++){
+                var zomb = new THREE.Mesh(
+                    new THREE.CubeGeometry( 30, 30, 30),
+                    new THREE.MeshLambertMaterial( { color: 0x44DD44 }) );
+                zomb.position.x = Math.random()*600;
+                zomb.position.y = Math.random()*600;
+                zomb.position.z = 30;
+                zombies.push(zomb);
+                scene.add(zomb);
+            }
+        }
+
+        function updateZombies(){
+            for (var i = 0; i < zombies.length; i++) {
+                var offX = box.position.x - zombies[i].position.x;
+                var offY = box.position.y - zombies[i].position.y;
+                //console.log("z#"+i + ", " + offX + ", " + offY);
+
+                var zangle = Math.atan2(offY,offX);
+                zombies[i].rotation.z = zangle;
+                zombies[i].position.x += Math.cos(zangle)*2;
+                zombies[i].position.y += Math.sin(zangle)*2;
+
+                for (var j = 0; j < zombies.length; j++) {
+
+                    var zoffX = zombies[i].position.x - zombies[j].position.x;
+                    var zoffY = zombies[i].position.y - zombies[j].position.y;
+
+                    var dist = Math.sqrt(zoffX*zoffX + zoffY*zoffY);
+                    
+                    if(dist < 30 && dist != 0){
+
+                        var zcangle = Math.atan2(zoffY,zoffX);
+                        zombies[i].position.x -= Math.cos(zcangle)*zoffX/2;
+                        zombies[i].position.y -= Math.sin(zcangle)*zoffY/2;
+                        zombies[j].position.x += Math.cos(zcangle)*zoffX/2;
+                        zombies[j].position.y += Math.sin(zcangle)*zoffY/2;
+                    }
+                };
+
+            };
+        }
+
+
+
+
+
+        var pressedW,pressedA,pressedS,pressedD,pressedUp,pressedLeft,pressedDown,pressedRight,move;
+        var W = 87;
+        var A = 65;
+        var S = 83;
+        var D = 68;
+
+        var up = 38;
+        var right = 37;
+        var down = 40;
+        var left = 39;
+
+        function onKeyDown(evt){
+            
+
+            switch(evt.keyCode){
+                case W:
+                pressedW=true;
+                break;
+
+                case A:
+                pressedA = true;
+                break;
+
+                case S:
+                pressedS = true;
+                break;
+
+                case D:
+                pressedD = true;
+                break;
+
+                case up:
+                pressedUp=true;
+                break;
+
+                case right:
+                pressedRight = true;
+                break;
+
+                case down:
+                pressedDown = true;
+                break;
+
+                case left:
+                pressedLeft = true;
+                break;
+            }
+        }
+
+        function onKeyUp(evt){
+           
+           switch(evt.keyCode){
+                case W:
+                pressedW=false;
+                break;
+
+                case A:
+                pressedA = false;
+                break;
+
+                case S:
+                pressedS = false;
+                break;
+
+                case D:
+                pressedD = false;
+                break;
+
+                 case up:
+                pressedUp=false;
+                break;
+
+                case right:
+                pressedRight = false;
+                break;
+
+                case down:
+                pressedDown = false;
+                break;
+
+                case left:
+                pressedLeft = false;
+                break;
+            }
+        }
+
+        function onMouseMove(event){
+             mouse3D = new THREE.Vector3(
+                 ( event.clientX / window.innerWidth ) * 2 - 1,
+                 - ( event.clientY / window.innerHeight ) * 2 + 1,
+                 0.5 );
+        }
+
+        function onMouseUp(event){
+            
+        }
+
+        function animate() {
+
+            // note: three.js includes requestAnimationFrame shim
+            requestAnimationFrame( animate );
+            input();
+            movePlayer();
+            updateZombies();
+            render();
+
+        }
+
+        function render() {
+            renderer.render( scene, camera );
+        }
+
+        var angle= 0;
+        function input(){
+            //Keyboard
+            /*if(pressedW){
+                box.position.y+=3;
+                camera.position.y+=3;
+            }
+            if(pressedS){
+                box.position.y-=3;
+                camera.position.y-=3;
+            }
+            if(pressedA){
+                box.position.x-=3;
+                camera.position.x-=3;
+            }
+            if(pressedD){
+                box.position.x+=3;
+                camera.position.x+=3;
+            }*/
+
+
+            move = pressedUp || pressedLeft || pressedDown || pressedRight;
+            if(pressedUp){
+                angle = 90;
+
+                if(pressedLeft) angle = 45;
+                else if(pressedRight) angle = 135;
+                               
+            }else if(pressedDown){
+                    angle = 270;
+
+                    if(pressedLeft) angle = 315;
+                    else if(pressedRight) angle = 225;
+                            
+                }else if(pressedLeft)
+                        angle = 0;
+
+                    else if(pressedRight)
+                            angle = 180;
+
+            
+            
+        }
+
+    </script>
+</head>
+
+<body style="margin:0px;overflow:hidden;"></body>
+
+</html>
