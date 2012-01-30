@@ -72,7 +72,7 @@
             box.position.z = 30;
             scene.add(box);
 
-            spawnZombie(5);
+            spawnZombie(200);
 
 
             renderer = new THREE.WebGLRenderer({antialias: true});
@@ -121,23 +121,23 @@
 
                 var zangle = Math.atan2(offY,offX);
                 zombies[i].mesh.rotation.z = zangle;
-                zombies[i].mesh.position.x += Math.cos(zangle)*2;
-                zombies[i].mesh.position.y += Math.sin(zangle)*2;
+                var step = new THREE.Vector3(Math.cos(zangle),Math.sin(zangle),0);
+                zombies[i].mesh.position.addSelf(step);
 
                 for (var j = 0; j < zombies.length; j++) {
 
-                    var zoffX = zombies[i].mesh.position.x - zombies[j].mesh.position.x;
-                    var zoffY = zombies[i].mesh.position.y - zombies[j].mesh.position.y;
+                    var zoffX = zombies[j].mesh.position.x - zombies[i].mesh.position.x;
+                    var zoffY = zombies[j].mesh.position.y - zombies[i].mesh.position.y;
 
                     var dist = Math.sqrt(zoffX*zoffX + zoffY*zoffY);
-                    
-                    if(dist < 30 && dist != 0){
-
-                        var zcangle = Math.atan2(zoffY,zoffX);
-                        zombies[i].mesh.position.x -= Math.cos(zcangle)*zoffX/2;
-                        zombies[i].mesh.position.y -= Math.sin(zcangle)*zoffY/2;
-                        zombies[j].mesh.position.x += Math.cos(zcangle)*zoffX/2;
-                        zombies[j].mesh.position.y += Math.sin(zcangle)*zoffY/2;
+                    var cangle = Math.atan2(zoffY, zoffX);
+                    var radii = zombies[i].radius+zombies[j].radius;
+                    if(dist != 0){
+                        if(dist < radii){
+                            var point = new THREE.Vector3(zoffX,zoffY,0);
+                            zombies[j].mesh.position.x = zombies[i].mesh.position.x+(radii * Math.cos(cangle));
+                            zombies[j].mesh.position.y = zombies[i].mesh.position.y+(radii * Math.sin(cangle));
+                        }
                     }
                 };
 
