@@ -2,14 +2,14 @@
 
 function Bullet (player) {
     this.sourcePos = player.mesh.position;
-    this.radius = 4;
-    this.strength = 50;
+    this.radius = 2;
+    this.strength = 70;
     this.speed = 25;
     this.range = 1000;
     this.isPassive = false;
     this.direction = player.mesh.rotation.z;
-    this.mesh = new THREE.Mesh(
-                new THREE.SphereGeometry( this.radius,10,10),
+    this.mesh = new THREE.Line(
+                new THREE.Geometry({vertices:[]}),
                 new THREE.MeshLambertMaterial( { color: 0xFF0000 }) );
     this.startPoint = new THREE.Vector3(
         this.mesh.position.x = player.mesh.position.x,

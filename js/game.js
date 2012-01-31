@@ -252,7 +252,7 @@ var camOffset = new THREE.Vector3(0,-300,300);
                 break;
 
                 case space:
-                shoot();
+                spacePressed=true;
                 break;
             }
 

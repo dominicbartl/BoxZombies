@@ -1,2 +1,7 @@
-A WebGL game based on Three.js
+A WebGL zombie game with Three.js
+Don't expect a full working game here. It looks ugly and isn't finished yet. 
+I always pubilsh the current state here and you can daily see changes and improvments.
+Runs best in Chrome.
+Try it out here:
+http://bartinger.github.com/BoxZombies/
 
