@@ -1,7 +1,9 @@
 
 
 function Bullet (player) {
+    this.sourcePos = player.mesh.position;
     this.radius = 4;
+    this.strength = 50;
     this.speed = 25;
     this.range = 1000;
     this.isPassive = false;

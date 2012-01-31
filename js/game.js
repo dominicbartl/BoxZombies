@@ -3,8 +3,8 @@
 var camera, scene, renderer,
 geometry, material, projector, mouse3D;
 
-var camAngle = 45;
-var camDist = 300;
+var camAngle = 55;
+var camDist = 450;
 
 var camOffset = new THREE.Vector3(0,-300,300);
 
@@ -77,7 +77,7 @@ var camOffset = new THREE.Vector3(0,-300,300);
             scene.add(player.mesh);
 
             updateCamera();
-            spawnZombie(20);
+            spawnZombie(0);
 
 
             renderer = new THREE.WebGLRenderer({antialias: true});

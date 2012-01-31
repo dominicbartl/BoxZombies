@@ -31,6 +31,14 @@ Zombie.prototype.hitTestBullets = function(bullets) {
             this.life--;
 
             //fallback
+            var angle = Math.atan2(
+                this.mesh.position.y - bullets[i].sourcePos.y,
+                this.mesh.position.x - bullets[i].sourcePos.x
+            );
+
+            this.mesh.position.addSelf(new THREE.Vector3(
+                Math.cos(angle)*bullets[i].strength,
+                Math.sin(angle)*bullets[i].strength,0));
 
 
             if(this.life <= 0){
