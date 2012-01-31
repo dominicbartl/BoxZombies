@@ -3,9 +3,11 @@
         var camera, scene, renderer,
         geometry, material, projector, mouse3D;
 
-        var camOffset = new THREE.Vector3(0,-300,500);
+        var camOffset = new THREE.Vector3(0,-300,300);
 
-        var floor,box;
+        var floor;
+
+        var player;
         var zombies = [];
 
         window.onload = init;
@@ -30,6 +32,8 @@
             var directionalLight = new THREE.DirectionalLight(0xffffff);
             directionalLight.position.set(1, 1, 1).normalize();
             scene.add(directionalLight);
+
+            scene.fog = new THREE.FogExp2( 0xFFFFFF, 0.0005 );
 
             
             // material
@@ -66,13 +70,10 @@
 
 
             //Player
-            box = new THREE.Mesh(
-                new THREE.CubeGeometry( 30, 30, 30),
-                new THREE.MeshLambertMaterial( { color: 0x444444 }) );
-            box.position.z = 30;
-            scene.add(box);
+            player = new Player(new THREE.Vector3(0,0,30));
+            scene.add(player.mesh);
 
-            spawnZombie(200);
+            spawnZombie(20);
 
 
             renderer = new THREE.WebGLRenderer({antialias: true});
@@ -96,11 +97,11 @@
 
         function movePlayer(){
             if(move){
-                box.rotation.z = angle*(Math.PI/180);
-                box.position.x +=Math.cos(box.rotation.z)*speed;
-                box.position.y +=Math.sin(box.rotation.z)*speed;
-                camera.position.x = box.position.x;
-                camera.position.y = box.position.y -300;
+                player.mesh.rotation.z = angle*(Math.PI/180);
+                player.mesh.position.x +=Math.cos(player.mesh.rotation.z)*speed;
+                player.mesh.position.y +=Math.sin(player.mesh.rotation.z)*speed;
+                camera.position.x = player.mesh.position.x;
+                camera.position.y = player.mesh.position.y -300;
             }
         }
 
@@ -115,14 +116,27 @@
 
         function updateZombies(){
             for (var i = 0; i < zombies.length; i++) {
-                var offX = box.position.x - zombies[i].mesh.position.x;
-                var offY = box.position.y - zombies[i].mesh.position.y;
-                //console.log("z#"+i + ", " + offX + ", " + offY);
+                var offX = player.mesh.position.x - zombies[i].mesh.position.x;
+                var offY = player.mesh.position.y - zombies[i].mesh.position.y;
 
                 var zangle = Math.atan2(offY,offX);
                 zombies[i].mesh.rotation.z = zangle;
                 var step = new THREE.Vector3(Math.cos(zangle),Math.sin(zangle),0);
                 zombies[i].mesh.position.addSelf(step);
+
+                offX = player.mesh.position.x - zombies[i].mesh.position.x;
+                offY = player.mesh.position.y - zombies[i].mesh.position.y;
+                var pdist = Math.sqrt(offX*offX + offY*offY);
+                zangle = Math.atan2(offY,offX);
+
+                var pradii = zombies[i].radius+21;
+                if(pdist != 0){
+                        if(pdist < pradii){
+                            var point = new THREE.Vector3(zoffX,zoffY,0);
+                            zombies[i].mesh.position.x = player.mesh.position.x-(pradii * Math.cos(zangle));
+                            zombies[i].mesh.position.y = player.mesh.position.y-(pradii * Math.sin(zangle));
+                        }
+                    }
 
                 for (var j = 0; j < zombies.length; j++) {
 
@@ -264,19 +278,19 @@
         function input(){
             //Keyboard
             /*if(pressedW){
-                box.position.y+=3;
+                player.mesh.position.y+=3;
                 camera.position.y+=3;
             }
             if(pressedS){
-                box.position.y-=3;
+                player.mesh.position.y-=3;
                 camera.position.y-=3;
             }
             if(pressedA){
-                box.position.x-=3;
+                player.mesh.position.x-=3;
                 camera.position.x-=3;
             }
             if(pressedD){
-                box.position.x+=3;
+                player.mesh.position.x+=3;
                 camera.position.x+=3;
             }*/
 
