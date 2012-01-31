@@ -1,13 +1,17 @@
  var tex_stone = "stone.jpg";
 
-        var camera, scene, renderer,
-        geometry, material, projector, mouse3D;
+var camera, scene, renderer,
+geometry, material, projector, mouse3D;
 
-        var camOffset = new THREE.Vector3(0,-300,300);
+var camAngle = 45;
+var camDist = 300;
+
+var camOffset = new THREE.Vector3(0,-300,300);
 
         var floor;
 
         var player;
+        var bullets = [];
         var zombies = [];
 
         window.onload = init;
@@ -18,8 +22,7 @@
             scene = new THREE.Scene();
 
             camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 10000 );
-            camera.position = camOffset;
-            //camera.position.y = 0;
+            
             camera.lookAt(new THREE.Vector3(0,0,0));
             
             scene.add( camera );
@@ -73,6 +76,7 @@
             player = new Player(new THREE.Vector3(0,0,30));
             scene.add(player.mesh);
 
+            updateCamera();
             spawnZombie(20);
 
 
@@ -100,8 +104,7 @@
                 player.mesh.rotation.z = angle*(Math.PI/180);
                 player.mesh.position.x +=Math.cos(player.mesh.rotation.z)*speed;
                 player.mesh.position.y +=Math.sin(player.mesh.rotation.z)*speed;
-                camera.position.x = player.mesh.position.x;
-                camera.position.y = player.mesh.position.y -300;
+                updateCamera();
             }
         }
 
@@ -116,6 +119,14 @@
 
         function updateZombies(){
             for (var i = 0; i < zombies.length; i++) {
+                if(zombies[i].isPassive){
+                    scene.remove(zombies[i].mesh);
+                    zombies.splice(i,1);
+                    console.log("PASSIVE");
+                    continue;
+                }
+
+
                 var offX = player.mesh.position.x - zombies[i].mesh.position.x;
                 var offY = player.mesh.position.y - zombies[i].mesh.position.y;
 
@@ -131,12 +142,14 @@
 
                 var pradii = zombies[i].radius+21;
                 if(pdist != 0){
-                        if(pdist < pradii){
-                            var point = new THREE.Vector3(zoffX,zoffY,0);
-                            zombies[i].mesh.position.x = player.mesh.position.x-(pradii * Math.cos(zangle));
-                            zombies[i].mesh.position.y = player.mesh.position.y-(pradii * Math.sin(zangle));
-                        }
+                    if(pdist < pradii){
+                        var point = new THREE.Vector3(zoffX,zoffY,0);
+                        zombies[i].mesh.position.x = player.mesh.position.x-(pradii * Math.cos(zangle));
+                        zombies[i].mesh.position.y = player.mesh.position.y-(pradii * Math.sin(zangle));
                     }
+                }
+
+                zombies[i].hitTestBullets(bullets);
 
                 for (var j = 0; j < zombies.length; j++) {
 
@@ -159,10 +172,36 @@
         }
 
 
+        function updateCamera(){
+            camera.position.x = player.mesh.position.x;
+            camera.position.y = player.mesh.position.y-camDist*Math.cos(camAngle*(Math.PI/180));
+            camera.position.z = player.mesh.position.z+camDist*Math.sin(camAngle*(Math.PI/180));
+            camera.lookAt(player.mesh.position);
+        }
 
 
 
-        var pressedW,pressedA,pressedS,pressedD,pressedUp,pressedLeft,pressedDown,pressedRight,move;
+
+        function shoot(){
+            var bullet = new Bullet(player);
+            bullets.push(bullet);
+            scene.add(bullet.mesh);
+        }
+
+        function updateBullets(){
+            for (var i = 0; i < bullets.length; i++) {
+                if(!bullets[i].isPassive)
+                    bullets[i].update(1);
+                else{
+                    scene.remove(bullets[i].mesh);
+                    bullets.splice(i,1);
+                }
+            };
+        }
+
+
+
+        var pressedW,pressedA,pressedS,pressedD,pressedUp,pressedLeft,pressedDown,pressedRight,move,spacePressed;
         var W = 87;
         var A = 65;
         var S = 83;
@@ -173,8 +212,9 @@
         var down = 40;
         var left = 39;
 
+        var space = 32;
+
         function onKeyDown(evt){
-            
 
             switch(evt.keyCode){
                 case W:
@@ -183,10 +223,12 @@
 
                 case A:
                 pressedA = true;
+                camAngle++;
                 break;
 
                 case S:
                 pressedS = true;
+                camAngle--;
                 break;
 
                 case D:
@@ -208,7 +250,13 @@
                 case left:
                 pressedLeft = true;
                 break;
+
+                case space:
+                shoot();
+                break;
             }
+
+            updateCamera();
         }
 
         function onKeyUp(evt){
@@ -245,6 +293,10 @@
                 case left:
                 pressedLeft = false;
                 break;
+
+                case space:
+                spacePressed = false;
+                break;
             }
         }
 
@@ -266,6 +318,7 @@
             input();
             movePlayer();
             updateZombies();
+            updateBullets();
             render();
 
         }
@@ -314,6 +367,6 @@
                     else if(pressedRight)
                             angle = 180;
 
-            
+            if(spacePressed) shoot();
             
         }

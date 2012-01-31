@@ -2,6 +2,8 @@
 
 function Zombie (position) {
     this.radius = 21;
+    this.life = 3;
+    this.isPassive = false;
     this.mesh = new THREE.Mesh(
                     new THREE.CubeGeometry( 30, 30, 50),
                     new THREE.MeshLambertMaterial( { color: 0x44DD44 }) );
@@ -17,4 +19,23 @@ function Zombie (position) {
 
 Zombie.prototype.getMesh = function() {
     return this.mesh;
+};
+
+
+Zombie.prototype.hitTestBullets = function(bullets) {
+    for (var i = 0; i < bullets.length; i++) {
+
+        var dist = this.mesh.position.distanceTo(bullets[i].mesh.position);
+        if(dist < this.radius){
+            bullets[i].isPassive = true;
+            this.life--;
+
+            //fallback
+
+
+            if(this.life <= 0){
+                this.isPassive = true;
+            }
+        }
+    };
 };
