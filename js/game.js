@@ -1,4 +1,3 @@
- var tex_stone = "stone.jpg";
 
 var camera, scene, renderer,
 geometry, material, projector, mouse3D;
@@ -6,12 +5,20 @@ geometry, material, projector, mouse3D;
 var camAngle = 55;
 var camDist = 450;
 
+//Setup stats
+var stats = new Stats();
+
+//Align top-left
+stats.getDomElement().style.position = 'absolute';
+stats.getDomElement().style.left = '0px';
+stats.getDomElement().style.top = '0px';
+
 var camOffset = new THREE.Vector3(0,-300,300);
 
-        var floor;
+var floor;
 
-        var player;
-        var bullets = [];
+var player;
+var bullets = [];
         var zombies = [];
 
         window.onload = init;
@@ -86,12 +93,12 @@ var camOffset = new THREE.Vector3(0,-300,300);
             projector = new THREE.Projector();
 
             document.body.appendChild( renderer.domElement );
+            document.body.appendChild( stats.getDomElement() );
 
             window.addEventListener("keydown",onKeyDown);
             window.addEventListener("keyup",onKeyUp);
             window.addEventListener("mousemove",onMouseMove);
             window.addEventListener("mouseup", onMouseUp);
-
 
             animate();
 
@@ -321,6 +328,8 @@ var camOffset = new THREE.Vector3(0,-300,300);
             updateBullets();
             render();
 
+            stats.update();
+
         }
 
         function render() {
@@ -370,3 +379,9 @@ var camOffset = new THREE.Vector3(0,-300,300);
             if(spacePressed) shoot();
             
         }
+
+
+function spawnForm(){
+    var amount = document.getElementById("amount").value;
+    spawnZombie(amount);
+}
