@@ -215,7 +215,7 @@ var camOffset = new THREE.Vector3(0,-300,300);
         var space = 32;
 
         function onKeyDown(evt){
-
+            console.log(evt.keyCode);
             switch(evt.keyCode){
                 case W:
                 pressedW=true;

@@ -8,14 +8,33 @@ function Bullet (player) {
     this.range = 1000;
     this.isPassive = false;
     this.direction = player.mesh.rotation.z;
-    this.mesh = new THREE.Line(
-                new THREE.Geometry({vertices:[]}),
+
+
+    var xStep = Math.cos(this.direction);
+    var yStep = Math.sin(this.direction);
+
+
+    /*var geometry = new THREE.Geometry();
+
+    var vector = player.mesh.position.clone();
+
+    geometry.vertices.push( new THREE.Vertex( vector ) );
+    var vector2 = vector.clone();
+
+    vector2.x +=xStep*10;
+    vector2.y +=yStep*10;
+
+    geometry.vertices.push( new THREE.Vertex( vector2 ) );
+    this.mesh = new THREE.Line( geometry, new THREE.LineBasicMaterial( { color: 0xAAAAAA , linewidth:3} ) );*/
+
+    this.mesh = new THREE.Mesh(
+                new THREE.SphereGeometry(this.radius,5,5),
                 new THREE.MeshLambertMaterial( { color: 0xFF0000 }) );
-    this.startPoint = new THREE.Vector3(
-        this.mesh.position.x = player.mesh.position.x,
-        this.mesh.position.y = player.mesh.position.y,
-        this.mesh.position.z = player.mesh.position.z
-    );
+
+    this.stepVector = new THREE.Vector3(xStep*=this.speed,yStep*=this.speed,0);
+
+    this.startPoint =  player.mesh.position.clone();
+    this.mesh.position = player.mesh.position.clone();
 }
 
 Bullet.prototype.update = function(delta) {
@@ -23,6 +42,5 @@ Bullet.prototype.update = function(delta) {
         this.isPassive = true;
         return;
     }
-    this.mesh.position.x +=Math.cos(this.direction)*this.speed;
-    this.mesh.position.y +=Math.sin(this.direction)*this.speed;
+    this.mesh.position.addSelf(this.stepVector);
 };
