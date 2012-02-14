@@ -2,7 +2,7 @@
 
 function Bullet (player) {
     this.sourcePos = player.mesh.position;
-    this.radius = 2;
+    this.radius = 5;
     this.strength = 70;
     this.speed = 25;
     this.range = 1000;
@@ -33,8 +33,7 @@ function Bullet (player) {
 
     this.stepVector = new THREE.Vector3(xStep*=this.speed,yStep*=this.speed,0);
 
-    this.startPoint =  player.mesh.position.clone();
-    this.mesh.position = player.mesh.position.clone();
+    this.startPoint = this.mesh.position =  player.mesh.position.clone();
 }
 
 Bullet.prototype.update = function(delta) {
