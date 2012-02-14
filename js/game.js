@@ -312,8 +312,8 @@ function input(){
         player.mesh.rotation.z = angle;
     }
 
-    player.shouldMove = pressedUp || pressedLeft || pressedDown || pressedRight;
-    player.move(pressedUp, pressedLeft, pressedDown, pressedRight);
+    player.shouldMove = pressedW || pressedD || pressedS || pressedA;
+    player.move(pressedW, pressedD, pressedS, pressedA);
 
     if(spacePressed || isMouseDown) shoot();
 }
